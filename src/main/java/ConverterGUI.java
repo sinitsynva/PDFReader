@@ -1,5 +1,6 @@
 import marytts.exceptions.MaryConfigurationException;
 import marytts.exceptions.SynthesisException;
+import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -16,8 +17,8 @@ class ConverterGUI extends Frame implements ActionListener
     {
         label1 = new Label("Path to input pdf");
         label2 = new Label("Path to output file");
-        text1 = new TextField(10);
-        text2 = new TextField(10);
+        text1 = new TextField(50);
+        text2 = new TextField(50);
         button1 = new Button("Convert");
         button2 = new Button("Close");
         add(label1);
@@ -26,27 +27,32 @@ class ConverterGUI extends Frame implements ActionListener
         add(text2);
         add(button1);
         add(button2);
-        setSize(200,200);
+        setSize(600,150);
         setTitle("Convert text to speech");
         setLayout(new FlowLayout());
         button1.addActionListener(this);
         button2.addActionListener(this);
     }
-    public void actionPerformed(ActionEvent action) {
+    public void actionPerformed(@NotNull ActionEvent action) {
         if(action.getSource()==button1)
-        {
+        {   PdfParser parser;
             try {
-            PdfWorker worker = new PdfWorker(text1.getText());
-            System.out.println(worker.getText());
-            AudioWorker audioWorker = new AudioWorker(worker.getText());
-            audioWorker.save(text2.getText());
+                parser = new PdfParser(text1.getText());
+                parser.parse();
+                System.out.println(parser.getTextFromAllPages());
             }
             catch (FileNotFoundException e) {
-                text1.setText("Invalid input entered");
-            }  catch (SynthesisException | MaryConfigurationException e) {
-                throw new RuntimeException(e);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
+                text1.setText("Invalid path entered");
+                return;
+            }  catch (IOException e) {
+                text1.setText("OOOOPs, something wrong...");
+                return;
+            }
+            try {
+                TTSWorker.convertAndSave(text2.getText(), parser.getTextFromAllPages());
+            } catch (SynthesisException | MaryConfigurationException | IOException e) {
+                text2.setText("OOOOPs, something wrong...");
+                return;
             }
 
         }
@@ -55,6 +61,7 @@ class ConverterGUI extends Frame implements ActionListener
             System.exit(0);
         }
     }
+
     public static void main(String[] args)
     {
         ConverterGUI calC = new ConverterGUI();
