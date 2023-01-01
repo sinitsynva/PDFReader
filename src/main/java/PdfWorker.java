@@ -1,18 +1,21 @@
 import java.io.*;
 
 import com.itextpdf.kernel.pdf.PdfDocument;
+import com.itextpdf.kernel.pdf.PdfPage;
 import com.itextpdf.kernel.pdf.PdfReader;
+import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.kernel.pdf.canvas.parser.PdfTextExtractor;
+import com.itextpdf.layout.Document;
 import org.jetbrains.annotations.NotNull;
 
-public class PdfParser {
+public class PdfWorker {
     private final File file;
     private PdfDocument document;
-    public PdfParser(String path) throws IOException {
+    public PdfWorker(String path) throws IOException {
         this.file = new File(path);
     }
 
-    public PdfParser(@NotNull File file){
+    public PdfWorker(@NotNull File file){
         this.file = file;
 
     }
@@ -21,6 +24,7 @@ public class PdfParser {
         PdfReader reader = new PdfReader(inputStream);
         document = new PdfDocument(reader);
         inputStream.close();
+        System.out.println("parse: " + document.getNumberOfPages());
     }
 
     public String getTextFromPage(int pageNumber){
@@ -44,6 +48,23 @@ public class PdfParser {
             pages[i] = i+1;
         }
         return getTextFromPages(pages);
+    }
+
+    private PdfPage getPage(int pageNumber) {
+        System.out.println("getPage: " + pageNumber);
+        return document.getPage(pageNumber);
+    }
+
+    public void extractPages(int[] pageNumbers, String path) throws FileNotFoundException {
+        File file = new File(path);
+        PdfDocument newDocument = new PdfDocument(new PdfWriter(file));
+        for (int i = 0; i < pageNumbers.length;  i++) {
+            System.out.println("extractPages: copy pageNumber " + pageNumbers[i]);
+        document.copyPagesTo(pageNumbers[i],i+36,newDocument);
+        //newDocument.addPage(getPage(pageNumber));
+        }
+        Document document = new Document(newDocument);
+        document.close();
     }
 
 }
