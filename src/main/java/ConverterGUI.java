@@ -10,27 +10,31 @@ import java.io.IOException;
 
 class ConverterGUI extends Frame implements ActionListener
 {
-    Label label1,label2;
-    TextField text1,text2;
+    Label label1,label2,label3;
+    TextField text1,text2,text3;
     Button button1,button2,button3;
     public ConverterGUI()
     {
         label1 = new Label("Path to input pdf");
         label2 = new Label("Path to output file");
+        label3 = new Label("Extracting pages separated by commas");
         text1 = new TextField(50);
         text2 = new TextField(50);
-        button1 = new Button("Convert");
-        button2 = new Button("Close");
+        text3 = new TextField(50);
+        button1 = new Button("Convert text");
         button3 = new Button("Extract pages");
+        button2 = new Button("Close");
         add(label1);
         add(text1);
         add(label2);
         add(text2);
+        add(label3);
+        add(text3);
         add(button1);
-        add(button2);
         add(button3);
-        setSize(600,150);
-        setTitle("Convert text to speech");
+        add(button2);
+        setSize(500,210);
+        setTitle("PDF features");
         setLayout(new FlowLayout());
         button1.addActionListener(this);
         button2.addActionListener(this);
@@ -64,22 +68,34 @@ class ConverterGUI extends Frame implements ActionListener
             System.exit(0);
         }
         if(action.getSource() == button3)
-        {
-            PdfWorker parser;
-            int[] pages = new int[2];
-            pages[0] = 36;
-            pages[1] = 37;
+        {   PdfWorker parser;
+            String[] pagesStr =  text3.getText().split(",");
+            int[] pages = new int[pagesStr.length];
+            for(int i=0; i<pages.length; i++){
+                try {
+                    System.out.println(pagesStr[i]);
+                    pages[i] = Integer.parseInt(pagesStr[i]);
+                } catch (NullPointerException | NumberFormatException e) {
+                    text3.setText("Invalid format pages");
+                    return;
+                }
+
+            }
             try {
-                System.out.println("start parse");
                 parser = new PdfWorker(text1.getText());
                 parser.parse();
-                System.out.println("start extract");
+            }
+            catch (FileNotFoundException e) {
+                text1.setText("Invalid path entered");
+                return;
+            }  catch (IOException e) {
+                text1.setText("OOOOPs, something wrong...");
+                return;
+            }
+            try {
                 parser.extractPages(pages, text2.getText());
-                System.out.println("end process");
             } catch (IOException e) {
-                System.out.println("exception");
-                throw new RuntimeException(e);
-
+                text3.setText("OOOOPs, something wrong...");
             }
         }
     }

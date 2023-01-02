@@ -58,10 +58,10 @@ public class PdfWorker {
     public void extractPages(int[] pageNumbers, String path) throws FileNotFoundException {
         File file = new File(path);
         PdfDocument newDocument = new PdfDocument(new PdfWriter(file));
-        for (int i = 0; i < pageNumbers.length;  i++) {
-            System.out.println("extractPages: copy pageNumber " + pageNumbers[i]);
-        document.copyPagesTo(pageNumbers[i],i+36,newDocument);
-        //newDocument.addPage(getPage(pageNumber));
+        for (int pageNumber : pageNumbers) {
+            System.out.println("extractPages: copy pageNumber " + pageNumber);
+            document.copyPagesTo(pageNumber, pageNumber, newDocument);
+            //newDocument.addPage(getPage(pageNumber));
         }
         Document document = new Document(newDocument);
         document.close();
